@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        canvas {
+            border: 1px solid #000;
+            width: 90%;
+            height: 90%;
+        }
+        body {
+            margin: 0;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            background-color: rgb(255, 255, 255);
+            font-family: Arial, sans-serif;
+        }
+        .right {
+            height: 100%;
+            width: 60%;
+            margin-top: 20px;
+        }
+        .left {
+            height: 100%;
+            width: 40%;
+            margin: 30px 0 0 30px;
+            overflow-y: auto;
+        }
+        .coordinates p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="left">
+        <label for="x1">X1 Coordinate:</label>
+        <input type="number" id="x1" placeholder="Enter X1 coordinate">
+        <label for="y1">Y1 Coordinate:</label>
+        <input type="number" id="y1" placeholder="Enter Y1 coordinate"><br>
+        <label for="x2">X2 Coordinate:</label>
+        <input type="number" id="x2" placeholder="Enter X2 coordinate">
+        <label for="y2">Y2 Coordinate:</label>
+        <input type="number" id="y2" placeholder="Enter Y2 coordinate"><br>
+        <label for="x3">X3 Coordinate:</label>
+        <input type="number" id="x3" placeholder="Enter X3 coordinate">
+        <label for="y3">Y3 Coordinate:</label>
+        <input type="number" id="y3" placeholder="Enter Y3 coordinate"><br>
+        <label for="x4">X4 Coordinate:</label>
+        <input type="number" id="x4" placeholder="Enter X4 coordinate">
+        <label for="y4">Y4 Coordinate:</label>
+        <input type="number" id="y4" placeholder="Enter Y4 coordinate"><br><br>
+        <label for="color">Choose Color:</label>
+        <input type="color" id="color" value="#000000">
+        <button onclick="addFigure()">Add Figure</button>
+        <div class="coordinates" id="coordinates"></div>
+    </div>
+    <div class="right">
+        <canvas id="figureCanvas"></canvas>
+        <div id="coords"></div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('figureCanvas');
+        const ctx = canvas.getContext('2d');
+        const coordsDiv = document.getElementById('coords');
+
+        function resizeCanvas() {
+            const pixelRatio = window.devicePixelRatio || 1;
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            canvas.width = width * pixelRatio;
+            canvas.height = height * pixelRatio;
+            ctx.scale(pixelRatio, pixelRatio);
+            
+            // Draw grid on the canvas
+            drawGrid();
+        }
+
+        function drawGrid() {
+            ctx.strokeStyle = '#ddd'; // Grid color
+            ctx.lineWidth = 0.5;
+            const gridSize = 20; // Size of grid squares
+
+            for (let x = gridSize; x < canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+
+            for (let y = gridSize; y < canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function addFigure() {
+            const x1 = parseFloat(document.getElementById('x1').value);
+            const y1 = parseFloat(document.getElementById('y1').value);
+            const x2 = parseFloat(document.getElementById('x2').value);
+            const y2 = parseFloat(document.getElementById('y2').value);
+            const x3 = parseFloat(document.getElementById('x3').value);
+            const y3 = parseFloat(document.getElementById('y3').value);
+            const x4 = parseFloat(document.getElementById('x4').value);
+            const y4 = parseFloat(document.getElementById('y4').value);
+
+            const color = document.getElementById('color').value;
+
+            if (!isNaN(x1) && !isNaN(y1) && !isNaN(x2) && !isNaN(y2) &&
+                !isNaN(x3) && !isNaN(y3) && !isNaN(x4) && !isNaN(y4)) {
+                drawFigure(x1, y1, x2, y2, x3, y3, x4, y4, color);
+                displayCoordinates(x1, y1, x2, y2, x3, y3, x4, y4, color);
+            } else {
+                alert('Please enter valid coordinates.');
+            }
+        }
+
+        function drawFigure(x1, y1, x2, y2, x3, y3, x4, y4, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.lineTo(x3, y3);
+            ctx.lineTo(x4, y4);
+            ctx.closePath();
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#000';
+            ctx.stroke();
+        }
+
+        function displayCoordinates(x1, y1, x2, y2, x3, y3, x4, y4, color) {
+            const coordinatesDiv = document.getElementById('coordinates');
+            const figureInfo = `
+                <p>
+                    <strong>Color:</strong> <span style="color:${color}">${color}</span><br>
+                    <strong>Coordinates:</strong><br>
+                    (X1, Y1): (${x1}, ${y1})<br>
+                    (X2, Y2): (${x2}, ${y2})<br>
+                    (X3, Y3): (${x3}, ${y3})<br>
+                    (X4, Y4): (${x4}, ${y4})<br>
+                </p>
+            `;
+            coordinatesDiv.innerHTML += figureInfo;
+        }
+
+        function getMousePos(event) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: event.clientX - rect.left,
+                y: event.clientY - rect.top
+            };
+        }
+
+        canvas.addEventListener('mousemove', (event) => {
+            const pos = getMousePos(event);
+            coordsDiv.textContent = `X: ${pos.x}, Y: ${pos.y}`;
+        });
+
+        resizeCanvas();
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
